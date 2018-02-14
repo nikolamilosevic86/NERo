@@ -27,16 +27,17 @@ class CoNLL2003Processor:
         if word[0].isupper():
             return True
         return False
-    def addPoS(self):
+    def addPoS_words(self):
         words = [x[0] for x in self.dataset]
         tags = nltk.pos_tag(words)
         ds = []
-        for i in range(0,len(tags)):
+        for i in range(0, len(tags)):
             capitalized = "normal"
             if self.isCapitalized(self.dataset[i][0]):
                 capitalized = "capitalized"
-            ds.append((self.dataset[i][0],tags[i][1],capitalized,self.dataset[i][1]))
+            ds.append((self.dataset[i][0], tags[i][1], capitalized, self.dataset[i][1]))
         self.dataset = ds
+    def addPoS_sentences(self):
         sent = []
         for s in self.sentences:
             words2 = [x[0] for x in s]
@@ -49,7 +50,7 @@ class CoNLL2003Processor:
                 ds.append((s[i][0], tags2[i][1], capitalized, s[i][1]))
             sent.append(ds)
         self.sentences = sent
-        print(self.sentences)
+        #print(self.sentences[0])
 
 
 
