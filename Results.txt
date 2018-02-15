@@ -1,4 +1,4 @@
-CRF_baseline.py classifier performance on CONLL data
+CRF_baseline.py classifier performance on CONLL data with 40000 sentences as training, rest as testing (26787)
              precision    recall  f1-score   support
 
       B-geo       0.86      0.90      0.88      6194

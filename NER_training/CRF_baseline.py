@@ -136,8 +136,8 @@ conll = CoNLL2003Processor("C:\\Users\\mbaxkhm4\\NERo\\Datasets\\CoNLL2003\\ner_
 conll.addPoS_sentences()
 crf = CRF_baseline_NER()
 print(crf.sent2features(conll.sentences[0])[0])
-train_sents = conll.sentences[:40000]
-test_sents = conll.sentences[40000:]
+train_sents = conll.sentences[:45000]
+test_sents = conll.sentences[45000:]
 crf.X_train = [crf.sent2features(s) for s in train_sents]
 crf.y_train = [crf.sent2labels(s) for s in train_sents]
 
