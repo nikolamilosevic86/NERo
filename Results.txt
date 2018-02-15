@@ -1,0 +1,21 @@
+CRF_baseline.py classifier performance on CONLL data
+             precision    recall  f1-score   support
+
+      B-geo       0.86      0.90      0.88      6194
+      B-gpe       0.96      0.95      0.95      2756
+      B-per       0.84      0.79      0.82      2784
+      I-geo       0.81      0.80      0.81      1142
+      B-org       0.78      0.73      0.75      3400
+      I-org       0.81      0.80      0.80      2880
+      B-tim       0.93      0.87      0.90      3431
+      B-art       0.21      0.08      0.12        75
+      I-art       0.21      0.15      0.17        41
+      I-per       0.86      0.88      0.87      2820
+      I-gpe       0.85      0.70      0.77        40
+      I-tim       0.85      0.76      0.80      1102
+      B-nat       0.63      0.47      0.54        36
+      B-eve       0.48      0.37      0.42        41
+      I-eve       0.18      0.11      0.14        35
+      I-nat       0.67      0.40      0.50        10
+
+avg / total       0.85      0.84      0.85     26787
