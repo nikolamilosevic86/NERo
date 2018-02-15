@@ -50,6 +50,39 @@ class CoNLL2003Processor:
                 ds.append((s[i][0], tags2[i][1], capitalized, s[i][1]))
             sent.append(ds)
         self.sentences = sent
+
+    def get_sentences_words_only(self):
+        word_sent = []
+        for sent in self.sentences:
+            word_list = []
+            for word,label in sent:
+                word_list.append(word)
+            word_sent.append(word_list)
+        return word_sent
+
+    def get_sentences_lablels_only(self):
+        label_sent = []
+        for sent in self.sentences:
+            lable_list = []
+            for word, label in sent:
+                lable_list.append(label)
+                label_sent.append(lable_list)
+        return label_sent
+    def full_text(self):
+        full_text = ""
+        for sent in self.sentences:
+            for word,label in sent:
+                full_text = full_text + " "+word
+        return full_text
+
+    def full_texts(self):
+        full_texts = []
+        for sent in self.sentences:
+            text = ""
+            for word, label in sent:
+                text = text + " " + word
+            full_texts.append(text)
+        return full_texts
         #print(self.sentences[0])
 
 

@@ -1,3 +1,7 @@
 sklearn-crfsuite
 nltk
-csv
+sklearn
+numpy
+scipy
+keras
+tensorflow

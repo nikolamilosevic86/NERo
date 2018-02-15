@@ -132,12 +132,12 @@ class CRF_baseline_NER():
     def predict(self,text):
         pass
 
-conll = CoNLL2003Processor("C:\\Users\\mbaxkhm4\\NERo\\Datasets\\CoNLL2003\\ner_dataset.csv")
+conll = CoNLL2003Processor("../Datasets/CoNLL2003/ner_dataset.csv")
 conll.addPoS_sentences()
 crf = CRF_baseline_NER()
 print(crf.sent2features(conll.sentences[0])[0])
-train_sents = conll.sentences[:45000]
-test_sents = conll.sentences[45000:]
+train_sents = conll.sentences[:40000]
+test_sents = conll.sentences[40000:]
 crf.X_train = [crf.sent2features(s) for s in train_sents]
 crf.y_train = [crf.sent2labels(s) for s in train_sents]
 
@@ -165,3 +165,4 @@ print("F1-score: "+str(recall_score))
 print(stats)
 filename = '../Models/crf_baseline_model.sav'
 pickle.dump(crf.crf_model, open(filename, 'wb'))
+print("Done with all")

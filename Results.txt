@@ -19,3 +19,25 @@ CRF_baseline.py classifier performance on CONLL data with 40000 sentences as tra
       I-nat       0.67      0.40      0.50        10
 
 avg / total       0.85      0.84      0.85     26787
+
+CRF_baseline.py classifier performance on CONLL data with 45000 sentences as training, rest as testing (9985)
+             precision    recall  f1-score   support
+
+      B-geo       0.85      0.90      0.87      2255
+      B-gpe       0.95      0.94      0.95       998
+      B-per       0.83      0.80      0.82      1053
+      I-geo       0.79      0.78      0.79       417
+      B-org       0.79      0.71      0.75      1332
+      I-org       0.80      0.77      0.78      1065
+      B-tim       0.92      0.87      0.90      1290
+      B-art       0.21      0.09      0.12        34
+      I-art       0.07      0.05      0.06        21
+      I-per       0.85      0.90      0.87      1033
+      I-gpe       0.64      0.60      0.62        15
+      I-tim       0.84      0.78      0.81       420
+      B-nat       0.50      0.25      0.33        12
+      B-eve       0.40      0.33      0.36        18
+      I-eve       0.25      0.11      0.15        19
+      I-nat       0.00      0.00      0.00         3
+
+avg / total       0.84      0.83      0.84      9985
