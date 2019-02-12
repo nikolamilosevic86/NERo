@@ -1,5 +1,5 @@
 from keras import Sequential
-from keras.layers import Embedding, LSTM, Dense, Flatten,TimeDistributed
+from keras.layers import Embedding, LSTM, Dense, Flatten, TimeDistributed, Bidirectional
 import os
 import numpy as np
 from keras.preprocessing.text import Tokenizer
@@ -94,9 +94,10 @@ class LSTM_NER():
                                          trainable=False)
         self.model = Sequential()
         self.model.add(self.embedding_layer)
-        self.model.add(LSTM(100, dropout=0.2, recurrent_dropout=0.2, return_sequences=True))
+        self.model.add(Bidirectional(LSTM(100, dropout=0.2, recurrent_dropout=0.2, return_sequences=True)))
+        self.model.add(Bidirectional(LSTM(20, dropout=0.2, recurrent_dropout=0.2, return_sequences=True)))
         self.model.add(TimeDistributed(Dense(17, activation='softmax')))
-        self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        self.model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
         self.model.summary()
         pass
 
@@ -104,11 +105,49 @@ class LSTM_NER():
         pass
 
     def train(self):
-        self.model.fit(self.X_train,self.Y_train,epochs=200,validation_split=0.1,batch_size=128)
+        self.model.fit(self.X_train,self.Y_train,epochs=150,validation_split=0.1,batch_size=128)
         pass
 
+    def test_model(self):
+        Y_pred = self.model.predict(self.X_test)
+        from sklearn import metrics
+        Y_testing = []
+        labels = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+        for i in range(0,len(self.Y_test)):
+            #Y_t_one = []
+            for j in range(0,len(self.Y_test[i])):
+                for k in range(0,len(self.Y_test[i][j])):
+                    if self.Y_test[i][j][k] ==1:
+                        Y_testing.append(k)
+            #Y_testing.append(Y_t_one)
+
+        Y_pred_F = []
+
+        for i in range(0,len(Y_pred)):
+            #Y_pred_one = []
+            for j in range(0,len(Y_pred[i])):
+                max_k = 0
+                max_k_val =0
+                for k in range(0,len(Y_pred[i][j])):
+                    if Y_pred[i][j][k]>max_k_val:
+                        max_k_val = Y_pred[i][j][k]
+                        max_k = k
+                Y_pred_F.append(max_k)
+            #Y_pred_F.append(Y_pred_one)
+
+        print(metrics.classification_report(Y_testing, Y_pred_F,labels))
+
+
     def save_mode(self):
+        self.model.save_weights("model.h5")
+        model_json = self.model.to_json()
+        with open("model.json", "w") as json_file:
+            json_file.write(model_json)
+        # serialize weights to HDF5
+        self.model.save_weights("model.h5")
+        print("Saved model to disk")
         pass
+
 
 GLOVE_DIR = "../Resources/"
 conll = CoNLL2003Processor("../Datasets/CoNLL2003/ner_dataset.csv")
@@ -138,3 +177,5 @@ print(lstm.Y_train.shape)
 print(lstm.X_train[0].shape)
 print(lstm.Y_train[0].shape)
 lstm.train()
+lstm.save_mode()
+lstm.test_model()
