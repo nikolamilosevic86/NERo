@@ -169,7 +169,7 @@ class CNN_BLSTM(object):
 
         self.init_weights = self.model.get_weights()
 
-        plot_model(self.model, to_file='model.png')
+        plot_model(self.model, to_file="../Models/"+'model.png')
 
         print("Model built. Saved model.png\n")
 
@@ -211,7 +211,7 @@ class CNN_BLSTM(object):
                                                        )
 
         modelName = self.modelName + ".h5"
-        self.model.save(modelName)
+        self.model.save("../Models/"+modelName)
         print("Model weights saved.")
 
         self.model.set_weights(self.init_weights)  # clear model
@@ -227,7 +227,7 @@ class CNN_BLSTM(object):
 
         output = np.matrix([[int(i) for i in range(self.epochs)], self.f1_test_history, self.f1_dev_history])
 
-        fileName = self.modelName + ".txt"
+        fileName = "../Models/"+self.modelName + ".txt"
         with open(fileName, 'wb') as f:
             for line in output:
                 np.savetxt(f, line, fmt='%.5f')

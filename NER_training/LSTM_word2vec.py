@@ -138,12 +138,12 @@ class LSTM_NER():
 
 
     def save_mode(self):
-        self.model.save_weights("model.h5")
+        self.model.save_weights("../Models/"+"model.h5")
         model_json = self.model.to_json()
-        with open("model.json", "w") as json_file:
+        with open("../Models/"+"model.json", "w") as json_file:
             json_file.write(model_json)
         # serialize weights to HDF5
-        self.model.save_weights("model.h5")
+        self.model.save_weights("../Models/"+"model.h5")
         print("Saved model to disk")
         pass
 
