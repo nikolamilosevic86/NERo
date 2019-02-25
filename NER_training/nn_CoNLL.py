@@ -150,11 +150,16 @@ class CNN_BLSTM(object):
 
         # concat & BLSTM
         output = concatenate([words, casing, char])
-        output = Bidirectional(LSTM(self.lstm_state_size,
+        output = Bidirectional(LSTM(self.lstm_state_size+100,
                                     return_sequences=True,
                                     dropout=self.dropout,  # on input to each LSTM block
                                     recurrent_dropout=self.dropout_recurrent  # on recurrent input signal
                                     ), name="BLSTM")(output)
+        output = Bidirectional(LSTM(self.lstm_state_size,
+                                    return_sequences=True,
+                                    dropout=self.dropout,  # on input to each LSTM block
+                                    recurrent_dropout=self.dropout_recurrent  # on recurrent input signal
+                                    ), name="BLSTM2")(output)
         output = TimeDistributed(Dense(len(self.label2Idx), activation='softmax'), name="Softmax_layer")(output)
 
         # set up model
@@ -233,11 +238,11 @@ class CNN_BLSTM(object):
 
 """Set parameters"""
 
-EPOCHS = 30               # paper: 80
+EPOCHS = 80               # paper: 80
 DROPOUT = 0.5             # paper: 0.68
 DROPOUT_RECURRENT = 0.25  # not specified in paper, 0.25 recommended
-LSTM_STATE_SIZE = 200     # paper: 275
-CONV_SIZE = 3             # paper: 3
+LSTM_STATE_SIZE = 275     # paper: 275
+CONV_SIZE = 5             # paper: 3
 LEARNING_RATE = 0.0105    # paper 0.0105
 OPTIMIZER = Nadam()       # paper uses SGD(lr=self.learning_rate), Nadam() recommended
 
