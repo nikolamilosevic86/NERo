@@ -1,4 +1,4 @@
-from keras import Sequential
+from keras import Sequential, Model, Input
 from keras.layers import Embedding, LSTM, Dense, Flatten, TimeDistributed, Bidirectional
 import os
 import numpy as np
@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, LabelBinarizer
 import tqdm
 from DataProcessors.CoNLL2003Processor import CoNLL2003Processor
+from ChainCRF import ChainCRF
 
 
 class LSTM_NER():
@@ -92,11 +93,19 @@ class LSTM_NER():
                                          weights=[self.embedding_matrix],
                                          input_length=70,
                                          trainable=False)
+        word_input = Input((70,), name='word_input')
         self.model = Sequential()
         self.model.add(self.embedding_layer)
-        self.model.add(Bidirectional(LSTM(500, dropout=0.2, recurrent_dropout=0.2, return_sequences=True)))
-        self.model.add(TimeDistributed(Dense(17, activation='softmax')))
-        self.model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+        self.model.add(Bidirectional(LSTM(1048, dropout=0.3, recurrent_dropout=0.2, return_sequences=True)))
+        #self.model.add(TimeDistributed(Dense(17, activation='softmax')))
+        #self.model.compile(loss='mean_squared_error', optimizer='nadam', metrics=['accuracy'])
+        self.model.add(TimeDistributed(Dense(50, activation='elu')))
+        self.model.add(TimeDistributed(Dense(17, activation=None)))  # a dense layer as suggested by neuralNer
+        crf = ChainCRF()
+        output = crf(self.model)
+        model = Model(inputs=[word_input],outputs=output)
+        #self.model.add(crf)
+        self.model.compile(loss=crf.sparse_loss, optimizer='adam', metrics=['accuracy'])
         self.model.summary()
         pass
 
@@ -104,7 +113,7 @@ class LSTM_NER():
         pass
 
     def train(self):
-        self.model.fit(self.X_train,self.Y_train,epochs=150,validation_split=0.1,batch_size=128)
+        self.model.fit(self.X_train,self.Y_train,epochs=10,validation_split=0.1,batch_size=128)
         pass
 
     def test_model(self):
@@ -112,6 +121,8 @@ class LSTM_NER():
         from sklearn import metrics
         Y_testing = []
         labels = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+        #labels = ["B-geo", "B-gpe", "B-per", "I-geo", "B-org", "I-org", "B-tim", "B-art", "I-art", "I-per", "I-gpe",
+        #                                          "I-tim", "B-nat", "B-eve", "I-eve", "I-nat"]
         for i in range(0,len(self.Y_test)):
             #Y_t_one = []
             for j in range(0,len(self.Y_test[i])):
@@ -153,8 +164,10 @@ conll = CoNLL2003Processor("../Datasets/CoNLL2003/ner_dataset.csv")
 sentences = conll.full_texts()
 labels = conll.get_sentences_lablels_only()
 text = conll.full_texts()
-text = text[:20000]
-sents = conll.sentences[:20000]
+text = text#[:20000]
+sents = conll.sentences#[:20000]
+# train_sents = conll.sentences[:40000]
+# test_sents = conll.sentences[40000:]
 ml = max([len(s) for s in sents])
 print("Maxlen observed: %d" % ml)
 #
