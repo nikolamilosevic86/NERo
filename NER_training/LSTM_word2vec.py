@@ -9,7 +9,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, LabelBinarizer
 import tqdm
 from DataProcessors.CoNLL2003Processor import CoNLL2003Processor
-from ChainCRF import ChainCRF
+from keras_contrib.layers import CRF
+from keras_contrib.losses import crf_loss
+from keras_contrib.metrics import crf_viterbi_accuracy
 
 
 class LSTM_NER():
@@ -93,19 +95,14 @@ class LSTM_NER():
                                          weights=[self.embedding_matrix],
                                          input_length=70,
                                          trainable=False)
-        word_input = Input((70,), name='word_input')
         self.model = Sequential()
         self.model.add(self.embedding_layer)
         self.model.add(Bidirectional(LSTM(1048, dropout=0.3, recurrent_dropout=0.2, return_sequences=True)))
-        #self.model.add(TimeDistributed(Dense(17, activation='softmax')))
-        #self.model.compile(loss='mean_squared_error', optimizer='nadam', metrics=['accuracy'])
-        self.model.add(TimeDistributed(Dense(50, activation='elu')))
-        self.model.add(TimeDistributed(Dense(17, activation=None)))  # a dense layer as suggested by neuralNer
-        crf = ChainCRF()
-        output = crf(self.model)
-        model = Model(inputs=[word_input],outputs=output)
-        #self.model.add(crf)
-        self.model.compile(loss=crf.sparse_loss, optimizer='adam', metrics=['accuracy'])
+        self.model.add(TimeDistributed(Dense(50, activation='relu')))
+        self.model.add(TimeDistributed(Dense(17, activation='relu')))  # a dense layer as suggested by neuralNer
+        crf = CRF(10, sparse_target=True)
+        self.model.add(crf)
+        self.model.compile(loss=crf_loss, optimizer='adam', metrics=[crf_viterbi_accuracy])
         self.model.summary()
         pass
 
@@ -121,20 +118,15 @@ class LSTM_NER():
         from sklearn import metrics
         Y_testing = []
         labels = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
-        #labels = ["B-geo", "B-gpe", "B-per", "I-geo", "B-org", "I-org", "B-tim", "B-art", "I-art", "I-per", "I-gpe",
-        #                                          "I-tim", "B-nat", "B-eve", "I-eve", "I-nat"]
         for i in range(0,len(self.Y_test)):
-            #Y_t_one = []
             for j in range(0,len(self.Y_test[i])):
                 for k in range(0,len(self.Y_test[i][j])):
                     if self.Y_test[i][j][k] ==1:
                         Y_testing.append(k)
-            #Y_testing.append(Y_t_one)
 
         Y_pred_F = []
 
         for i in range(0,len(Y_pred)):
-            #Y_pred_one = []
             for j in range(0,len(Y_pred[i])):
                 max_k = 0
                 max_k_val =0
@@ -143,7 +135,6 @@ class LSTM_NER():
                         max_k_val = Y_pred[i][j][k]
                         max_k = k
                 Y_pred_F.append(max_k)
-            #Y_pred_F.append(Y_pred_one)
 
         print(metrics.classification_report(Y_testing, Y_pred_F,labels))
 
@@ -170,13 +161,8 @@ sents = conll.sentences#[:20000]
 # test_sents = conll.sentences[40000:]
 ml = max([len(s) for s in sents])
 print("Maxlen observed: %d" % ml)
-#
-# text = ['test1 test2', 'test21 test22']
-# sents = [
-#     [('test1', 'O'), ('test2', 'B-geo')], [('test21', 'O'), ('test22', 'O')]
-# ]
+
 lstm = LSTM_NER()
-# lstm.load_GLoVe_embeddings(GLOVE_DIR,text)
 lstm.createModel(text)
 
 X = lstm.build_tensor(sents,len(sents),lstm.word_index,70)
