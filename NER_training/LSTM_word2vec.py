@@ -97,12 +97,14 @@ class LSTM_NER():
                                          trainable=False)
         self.model = Sequential()
         self.model.add(self.embedding_layer)
-        self.model.add(Bidirectional(LSTM(1048, dropout=0.3, recurrent_dropout=0.2, return_sequences=True)))
-        self.model.add(TimeDistributed(Dense(50, activation='relu')))
-        self.model.add(TimeDistributed(Dense(17, activation='relu')))  # a dense layer as suggested by neuralNer
-        crf = CRF(10, sparse_target=True)
-        self.model.add(crf)
-        self.model.compile(loss=crf_loss, optimizer='adam', metrics=[crf_viterbi_accuracy])
+        self.model.add(Bidirectional(LSTM(50, dropout=0.3, recurrent_dropout=0.5, return_sequences=True)))
+        self.model.add(Bidirectional(LSTM(25, dropout=0.3, recurrent_dropout=0.5, return_sequences=True)))
+        #self.model.add(TimeDistributed(Dense(50, activation='relu')))
+        self.model.add(TimeDistributed(Dense(17, activation='softmax')))  # a dense layer as suggested by neuralNer
+        #crf = CRF(17, sparse_target=True)
+        #self.model.add(crf)
+        #self.model.compile(loss=crf_loss, optimizer='adam', metrics=[crf_viterbi_accuracy])
+        self.model.compile(loss="categorical_crossentropy", optimizer='adam', metrics=['accuracy'])
         self.model.summary()
         pass
 
@@ -110,11 +112,12 @@ class LSTM_NER():
         pass
 
     def train(self):
-        self.model.fit(self.X_train,self.Y_train,epochs=10,validation_split=0.1,batch_size=128)
+        self.model.fit(self.X_train,self.Y_train,epochs=5,validation_split=0.1,batch_size=16)
         pass
 
     def test_model(self):
         Y_pred = self.model.predict(self.X_test)
+        print(Y_pred)
         from sklearn import metrics
         Y_testing = []
         labels = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
@@ -136,7 +139,18 @@ class LSTM_NER():
                         max_k = k
                 Y_pred_F.append(max_k)
 
-        print(metrics.classification_report(Y_testing, Y_pred_F,labels))
+        Y_test_F = []
+        for i in range(0,len(self.Y_test)):
+            for j in range(0,len(self.Y_test[i])):
+                max_k = 0
+                max_k_val =0
+                for k in range(0,len(self.Y_test[i][j])):
+                    if self.Y_test[i][j][k]>max_k_val:
+                        max_k_val = self.Y_test[i][j][k]
+                        max_k = k
+                Y_test_F.append(max_k)
+
+        print(metrics.classification_report(Y_test_F, Y_pred_F,labels))
 
 
     def save_mode(self):
@@ -175,5 +189,5 @@ print(lstm.Y_train.shape)
 print(lstm.X_train[0].shape)
 print(lstm.Y_train[0].shape)
 lstm.train()
-lstm.save_mode()
+#lstm.save_mode()
 lstm.test_model()
