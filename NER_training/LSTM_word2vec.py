@@ -97,14 +97,14 @@ class LSTM_NER():
                                          trainable=False)
         self.model = Sequential()
         self.model.add(self.embedding_layer)
-        self.model.add(Bidirectional(LSTM(50, dropout=0.3, recurrent_dropout=0.5, return_sequences=True)))
-        self.model.add(Bidirectional(LSTM(25, dropout=0.3, recurrent_dropout=0.5, return_sequences=True)))
+        self.model.add(Bidirectional(LSTM(500, dropout=0.2, recurrent_dropout=0.4, return_sequences=True)))#{'sum', 'mul', 'concat', 'ave', None}
+       # self.model.add(TimeDistributed(Bidirectional(LSTM(60, dropout=0.2, recurrent_dropout=0.5, return_sequences=True))))
         #self.model.add(TimeDistributed(Dense(50, activation='relu')))
         self.model.add(TimeDistributed(Dense(17, activation='softmax')))  # a dense layer as suggested by neuralNer
         #crf = CRF(17, sparse_target=True)
         #self.model.add(crf)
         #self.model.compile(loss=crf_loss, optimizer='adam', metrics=[crf_viterbi_accuracy])
-        self.model.compile(loss="categorical_crossentropy", optimizer='adam', metrics=['accuracy'])
+        self.model.compile(loss="categorical_crossentropy", optimizer='rmsprop', metrics=['accuracy'])
         self.model.summary()
         pass
 
@@ -112,7 +112,7 @@ class LSTM_NER():
         pass
 
     def train(self):
-        self.model.fit(self.X_train,self.Y_train,epochs=5,validation_split=0.1,batch_size=16)
+        self.model.fit(self.X_train,self.Y_train,epochs=1,validation_split=0.1,batch_size=16)
         pass
 
     def test_model(self):
