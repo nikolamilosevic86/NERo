@@ -1,6 +1,8 @@
 from os import listdir
 from os.path import isfile, join
 import xml.etree.ElementTree as ET
+
+import nltk
 from nltk.tokenize.treebank import TreebankWordTokenizer
 
 def readSurrogate(path):
@@ -54,6 +56,6 @@ def tokenize(documents):
     return documents2
 
 
-documents = readSurrogate("../Datasets/i2b2_data/training-PHI-Gold-Set1")
-documents = tokenize(documents)
-print("Hi")
+# documents = readSurrogate("../Datasets/i2b2_data/training-PHI-Gold-Set1")
+# documents = tokenize(documents)
+# print("Hi")
