@@ -1,31 +1,45 @@
 import pickle
 import sklearn_crfsuite
 from sklearn_crfsuite import metrics
-from Helpers.read_deid_surrogate import readSurrogate,tokenize
+from Helpers.read_deid_surrogate import readSurrogate, tokenize, tokenize_f
+
 
 class CRF_DeId_NER():
     def __init__(self):
         pass
 
+    def shape(self,word):
+        shape = ""
+        for letter in word:
+            if letter.isdigit():
+                shape = shape + "d"
+            elif letter.isalpha():
+                if letter.isupper():
+                    shape = shape + "W"
+                else:
+                    shape = shape + "w"
+            else:
+                shape = shape + letter
+        return shape
+
     def word2features(self,sent, i):
-        word = sent[i]['token']
+        word = sent[i][0]
         #postag = sent[i][1]
 
         features = {
             'bias': 1.0,
             'word.lower()': word.lower(),
-            'word[-3:]': word[-3:],
-            'word[-2:]': word[-2:],
             'word.isupper()': word.isupper(),
             'word.istitle()': word.istitle(),
             'word.isdigit()': word.isdigit(),
+            'word.shape()':self.shape(word),
             'word.isalnum()':word.isalnum(),
             'word.isalpha()':word.isalpha(),
             # 'postag': postag,
             # 'postag[:2]': postag[:2],
         }
         if i > 0:
-            word1 = sent[i - 1]['token']
+            word1 = sent[i - 1][0]
             #postag1 = sent[i - 1][1]
             features.update({
                 '-1:word.lower()': word1.lower(),
@@ -41,7 +55,7 @@ class CRF_DeId_NER():
             features['BOS'] = True
 
         if i > 1:
-            word2 = sent[i - 2]['token']
+            word2 = sent[i - 2][0]
             #postag2 = sent[i - 2][1]
             features.update({
                 '-2:word.lower()': word2.lower(),
@@ -56,7 +70,7 @@ class CRF_DeId_NER():
         else:
             features['BOS1'] = True
         if i > 2:
-            word3 = sent[i - 3]['token']
+            word3 = sent[i - 3][0]
             #postag3 = sent[i - 3][1]
             features.update({
                 '-3:word.lower()': word3.lower(),
@@ -72,7 +86,7 @@ class CRF_DeId_NER():
             features['BOS2'] = True
 
         if i > 3:
-            word4 = sent[i - 4]['token']
+            word4 = sent[i - 4][0]
             #postag4 = sent[i - 4][1]
             features.update({
                 '-4:word.lower()': word4.lower(),
@@ -88,7 +102,7 @@ class CRF_DeId_NER():
             features['BOS2'] = True
 
         if i < len(sent) - 1:
-            word1 = sent[i + 1]['token']
+            word1 = sent[i + 1][0]
             features.update({
                 '+1:word.lower()': word1.lower(),
                 '+1:word.istitle()': word1.istitle(),
@@ -102,7 +116,7 @@ class CRF_DeId_NER():
         else:
             features['EOS'] = True
         if i < len(sent) - 2:
-            word12 = sent[i + 2]['token']
+            word12 = sent[i + 2][0]
             #postag12 = sent[i + 2][1]
             features.update({
                 '+2:word.lower()': word12.lower(),
@@ -117,7 +131,7 @@ class CRF_DeId_NER():
         else:
             features['EOS2'] = True
         if i < len(sent) - 3:
-            word13 = sent[i + 3]['token']
+            word13 = sent[i + 3][0]
             #postag13 = sent[i + 3][1]
             features.update({
                 '+3:word.lower()': word13.lower(),
@@ -132,7 +146,7 @@ class CRF_DeId_NER():
         else:
             features['EOS2'] = True
         if i < len(sent) - 4:
-            word14 = sent[i + 4]['token']
+            word14 = sent[i + 4][0]
             #postag14 = sent[i + 4][1]
             features.update({
                 '+4:word.lower()': word14.lower(),
@@ -151,7 +165,7 @@ class CRF_DeId_NER():
     def doc2features(self,sent):
         return [self.word2features(sent['tokens'], i) for i in range(len(sent['tokens']))]
 
-    def doc2labels(self, sent):
+    def word2labels(self, sent):
         # labels= []
         # for token, postag, capitalized, label in sent:
         #     if label =='I-geo' or label =='B-geo' or label =='B-org' or label =='I-org' or label =='B-per' or label =='I-per':
@@ -159,7 +173,7 @@ class CRF_DeId_NER():
         #     else:
         #         labels.append('O')
         # return labels
-        return [sent['tokens'][i]['tag'] for i in range(len(sent['tokens']))]
+        return sent[1]
 
     def sent2tokens(self,sent):
         return [token for token, postag,capitalized, label in sent]
@@ -179,34 +193,61 @@ class CRF_DeId_NER():
         pass
     def predict(self,text):
         pass
-
-documents = readSurrogate("../Datasets/i2b2_data/training-PHI-Gold-Set1")
-documents = tokenize(documents)
-crf = CRF_DeId_NER()
-print(crf.doc2features(documents[0])[0])
+print("Dataset reading")
+documents = readSurrogate("../Datasets/i2b2_data/training-PHI-Gold-Set1-small")
+print("Dataset read")
+print("Tokenizing")
+documents = tokenize_f(documents)
+print("Tokenized")
+train_tokens = []
+test_tokens = []
 train_docs = documents[:400]
 test_docs = documents[400:]
-crf.X_train = [crf.doc2features(s) for s in train_docs]
-crf.y_train = [crf.doc2labels(s) for s in test_docs]
-
-crf.X_test = [crf.sent2features(s) for s in test_docs]
-crf.y_test = [crf.doc2labels(s) for s in test_docs]
+crf = CRF_DeId_NER()
+crf.X_train = []
+crf.y_train = []
+crf.X_test = []
+crf.y_test = []
+print("Training set creation")
+for doc in train_docs:
+    sequence = doc["tokens"]
+    features_seq = []
+    labels_seq = []
+    for i in range(0,len(sequence)):
+        features_seq.append(crf.word2features(sequence, i))
+        labels_seq.append(crf.word2labels(sequence[i]))
+    crf.X_train.append(features_seq)
+    crf.y_train.append(labels_seq)
+print("Training set created")
+print("Testing set creation")
+for doc in test_docs:
+    sequence = doc["tokens"]
+    features_seq = []
+    labels_seq = []
+    for i in range(0,len(sequence)):
+        features_seq.append(crf.word2features(sequence, i))
+        labels_seq.append(crf.word2labels(sequence[i]))
+    crf.X_test.append(features_seq)
+    crf.y_test.append(labels_seq)
+print("Testing set created")
+print("Training")
 crf.train()
+print("Train end")
 labels = list(crf.crf_model.classes_)
 labels.remove('O')
 print(labels)
-
+# #
 y_pred = crf.crf_model.predict(crf.X_test)
 f1_score = metrics.flat_f1_score(crf.y_test, y_pred,
-                      average='weighted', labels=labels)
-
+                       average='weighted', labels=labels)
+#
 precision_score = metrics.flat_precision_score(crf.y_test, y_pred,
-                      average='weighted', labels=labels)
-
+                       average='weighted', labels=labels)
+#
 recall_score = metrics.flat_recall_score(crf.y_test, y_pred,
-                      average='weighted', labels=labels)
+                       average='weighted', labels=labels)
 stats = metrics.flat_classification_report(crf.y_test, y_pred,
-                       labels=labels)
+                        labels=labels)
 print("Precision: "+str(precision_score))
 print("Recall: "+str(recall_score))
 print("F1-score: "+str(recall_score))
