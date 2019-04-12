@@ -1,6 +1,8 @@
 import pickle
 import sklearn_crfsuite
 from sklearn_crfsuite import metrics
+import sys
+sys.path.append('/home/mbaxknm4/NERo')
 from Helpers.read_deid_surrogate import readSurrogate, tokenize, tokenize_f
 
 
@@ -194,7 +196,7 @@ class CRF_DeId_NER():
     def predict(self,text):
         pass
 print("Dataset reading")
-documents = readSurrogate("../Datasets/i2b2_data/training-PHI-Gold-Set1-small")
+documents = readSurrogate("../Datasets/i2b2_data/training-PHI-Gold-Set1")
 print("Dataset read")
 print("Tokenizing")
 documents = tokenize_f(documents)
