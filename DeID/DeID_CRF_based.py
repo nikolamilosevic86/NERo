@@ -3,7 +3,7 @@ import sklearn_crfsuite
 from sklearn_crfsuite import metrics
 import sys
 sys.path.append('/home/mbaxknm4/NERo')
-from Helpers.read_deid_surrogate import readSurrogate, tokenize, tokenize_f
+from Helpers.read_deid_surrogate import readSurrogate, tokenize, tokenize_f, tokenize_fa
 
 
 class CRF_DeId_NER():
@@ -198,37 +198,37 @@ class CRF_DeId_NER():
 print("Dataset reading")
 documents = readSurrogate("../Datasets/i2b2_data/training-PHI-Gold-Set1")
 print("Dataset read")
+train_docs = documents[:400]
+test_docs = documents[400:]
 print("Tokenizing")
-documents = tokenize_f(documents)
+train_sequences = tokenize_fa(train_docs)
+test_sequences = tokenize_fa(test_docs)
 print("Tokenized")
 train_tokens = []
 test_tokens = []
-train_docs = documents[:400]
-test_docs = documents[400:]
+
 crf = CRF_DeId_NER()
 crf.X_train = []
 crf.y_train = []
 crf.X_test = []
 crf.y_test = []
 print("Training set creation")
-for doc in train_docs:
-    sequence = doc["tokens"]
+for seq in train_sequences:
     features_seq = []
     labels_seq = []
-    for i in range(0,len(sequence)):
-        features_seq.append(crf.word2features(sequence, i))
-        labels_seq.append(crf.word2labels(sequence[i]))
+    for i in range(0,len(seq)):
+        features_seq.append(crf.word2features(seq, i))
+        labels_seq.append(crf.word2labels(seq[i]))
     crf.X_train.append(features_seq)
     crf.y_train.append(labels_seq)
 print("Training set created")
 print("Testing set creation")
-for doc in test_docs:
-    sequence = doc["tokens"]
+for seq in test_sequences:
     features_seq = []
     labels_seq = []
-    for i in range(0,len(sequence)):
-        features_seq.append(crf.word2features(sequence, i))
-        labels_seq.append(crf.word2labels(sequence[i]))
+    for i in range(0,len(seq)):
+        features_seq.append(crf.word2features(seq, i))
+        labels_seq.append(crf.word2labels(seq[i]))
     crf.X_test.append(features_seq)
     crf.y_test.append(labels_seq)
 print("Testing set created")
