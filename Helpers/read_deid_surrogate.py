@@ -57,33 +57,7 @@ def tokenize(documents):
         documents2.append({"id": file, "text": text, "tags": doc["tags"],"tokens":real_tokens})
     return documents2
 
-def tokenize_f(documents):
-    real_tokens = []
-    documents2 = []
-    for doc in documents:
-        text = doc["text"]
-        file = doc["id"]
-        text = text.replace("\"", "'")
-        tokens = custom_span_tokenize(text)
-        for token in tokens:
-            token_txt = text[token[0]:token[1]]
-            found = False
-            for tag in doc["tags"]:
-                if int(tag["start"])<=token[0] and int(tag["end"])>=token[1]:
-                    token_tag = tag["tag"]
-                    #token_tag_type = tag["type"]
-                    found = True
-            if found==False:
-                token_tag = "O"
-                #token_tag_type = "O"
-
-            real_tokens.append((token_txt,token_tag))
-        documents2.append({"id": file, "text": text, "tags": doc["tags"],"tokens":real_tokens})
-    return documents2
-
 def tokenize_fa(documents):
-    real_tokens = []
-    documents2 = []
     sequences = []
     sequence = []
     for doc in documents:

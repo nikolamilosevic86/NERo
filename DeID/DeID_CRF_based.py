@@ -3,7 +3,7 @@ import sklearn_crfsuite
 from sklearn_crfsuite import metrics
 import sys
 sys.path.append('/home/mbaxknm4/NERo')
-from Helpers.read_deid_surrogate import readSurrogate, tokenize, tokenize_f, tokenize_fa
+from Helpers.read_deid_surrogate import readSurrogate, tokenize_fa
 
 
 class CRF_DeId_NER():
@@ -168,13 +168,6 @@ class CRF_DeId_NER():
         return [self.word2features(sent['tokens'], i) for i in range(len(sent['tokens']))]
 
     def word2labels(self, sent):
-        # labels= []
-        # for token, postag, capitalized, label in sent:
-        #     if label =='I-geo' or label =='B-geo' or label =='B-org' or label =='I-org' or label =='B-per' or label =='I-per':
-        #         labels.append(label)
-        #     else:
-        #         labels.append('O')
-        # return labels
         return sent[1]
 
     def sent2tokens(self,sent):
