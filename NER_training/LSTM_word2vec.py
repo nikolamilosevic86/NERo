@@ -77,7 +77,7 @@ class LSTM_NER():
         print('Found %s word vectors.' % len(self.embeddings_index))
         tokenizer = Tokenizer(num_words=self.MAX_NB_WORDS, lower=False)
         tokenizer.fit_on_texts(text)
-        sequences = tokenizer.texts_to_sequences(text)
+        #sequences = tokenizer.texts_to_sequences(text)
 
         self.word_index = tokenizer.word_index
 
