@@ -1,7 +1,7 @@
-sklearn-crfsuite
 nltk
 sklearn
 numpy
 scipy
 keras
 tensorflow
+sklearn-crfsuite
