@@ -27,7 +27,7 @@ class CNN_BLSTM(object):
         self.optimizer = OPTIMIZER
         self.MAX_SEQUENCE_LENGTH = 2000
         self.EMBEDDING_DIM = 300
-        self.MAX_NB_WORDS = 20000
+        self.MAX_NB_WORDS = 200000
 
     def loadData(self,path):
         documents = readSurrogate(path)
@@ -111,7 +111,7 @@ class CNN_BLSTM(object):
                                          trainable=False)
         self.model = Sequential()
         self.model.add(self.embedding_layer)
-        self.model.add(Bidirectional(LSTM(100, dropout=0.3, recurrent_dropout=0.6, return_sequences=True)))#{'sum', 'mul', 'concat', 'ave', None}
+        self.model.add(Bidirectional(LSTM(300, dropout=0.3, recurrent_dropout=0.4, return_sequences=True)))#{'sum', 'mul', 'concat', 'ave', None}
        # self.model.add(TimeDistributed(Bidirectional(LSTM(60, dropout=0.2, recurrent_dropout=0.5, return_sequences=True))))
         #self.model.add(TimeDistributed(Dense(50, activation='relu')))
         self.model.add(TimeDistributed(Dense(9, activation='softmax')))  # a dense layer as suggested by neuralNer
