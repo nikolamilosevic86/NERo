@@ -4,7 +4,7 @@ import os
 
 from keras_preprocessing import sequence
 from keras_preprocessing.text import Tokenizer
-from sklearn.preprocessing import LabelBinarizer, LabelEncoder
+from sklearn.preprocessing import LabelBinarizer
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 from Helpers.read_deid_surrogate import readSurrogate, tokenize_fa
@@ -39,15 +39,14 @@ class CNN_BLSTM(object):
         print("Tokenized")
 
     def train(self):
-        self.model.fit(self.X_train,self.Y_train,epochs=15,validation_split=0.1,batch_size=128)
+        self.model.fit(self.X_train,self.Y_train,epochs=10,validation_split=0.1,batch_size=32)
 
     def test_model(self):
         Y_pred = self.model.predict(self.X_test)
-      #  print(Y_pred)
+        print(Y_pred)
         from sklearn import metrics
         Y_testing = []
         labels = [1,2,3,4,5,6,7,8,9]
-        labels_named = ["DATE", "LOCATION", "NAME", "ID", "AGE", "CONTACT", "PROFESSION", "PHI"]
         for i in range(0,len(self.Y_test)):
             for j in range(0,len(self.Y_test[i])):
                 for k in range(0,len(self.Y_test[i][j])):
@@ -55,8 +54,6 @@ class CNN_BLSTM(object):
                         Y_testing.append(k)
 
         Y_pred_F = []
-        Y_pred_F_T = []
-        Y_test_F_T = []
 
         for i in range(0,len(Y_pred)):
             for j in range(0,len(Y_pred[i])):
@@ -67,7 +64,6 @@ class CNN_BLSTM(object):
                         max_k_val = Y_pred[i][j][k]
                         max_k = k
                 Y_pred_F.append(max_k)
-#                Y_pred_F_T.append(self.lb.inverse_transform(max_k))
 
         Y_test_F = []
         for i in range(0,len(self.Y_test)):
@@ -79,9 +75,8 @@ class CNN_BLSTM(object):
                         max_k_val = self.Y_test[i][j][k]
                         max_k = k
                 Y_test_F.append(max_k)
-#                Y_test_F_T.append(self.lb.inverse_transform(max_k))
 
-        print(metrics.classification_report(Y_test_F, Y_pred_F,labels_named))
+        print(metrics.classification_report(Y_test_F, Y_pred_F,labels))
 
     def word2labels(self,token):
         return token[1]
@@ -121,7 +116,7 @@ class CNN_BLSTM(object):
                                          trainable=False)
         self.model = Sequential()
         self.model.add(self.embedding_layer)
-        self.model.add(Bidirectional(LSTM(500, dropout=0.4, recurrent_dropout=0.25, return_sequences=True)))#{'sum', 'mul', 'concat', 'ave', None}
+        self.model.add(Bidirectional(LSTM(500, dropout=0.2, recurrent_dropout=0.6, return_sequences=True)))#{'sum', 'mul', 'concat', 'ave', None}
        # self.model.add(TimeDistributed(Bidirectional(LSTM(60, dropout=0.2, recurrent_dropout=0.5, return_sequences=True))))
         #self.model.add(TimeDistributed(Dense(50, activation='relu')))
         self.model.add(TimeDistributed(Dense(9, activation='softmax')))  # a dense layer as suggested by neuralNer
@@ -140,8 +135,8 @@ class CNN_BLSTM(object):
         for lbl in label_set:
             label_index[lbl] = len(label_index)
 
-        self.lb = LabelBinarizer()
-        self.lb.fit(list(label_index.values()))
+        lb = LabelBinarizer()
+        lb.fit(list(label_index.values()))
         i = 0
         plabels = []
         for sent in tqdm(sequences, desc='Building tensor'):
@@ -162,7 +157,7 @@ class CNN_BLSTM(object):
         if is_label:
             plabels = sequence.pad_sequences(plabels, maxlen=maxlen)
             print(plabels.shape)
-            pdata = np.array([self.lb.transform(l) for l in plabels])
+            pdata = np.array([lb.transform(l) for l in plabels])
         else:
             pdata = sequence.pad_sequences(data, maxlen=maxlen)
         return pdata
@@ -208,9 +203,13 @@ cnblstm.make_sequnces_labels()
 cnblstm.createModel(cnblstm.X_train)
 X = cnblstm.build_tensor(cnblstm.trainSequences,len(cnblstm.trainSequences),cnblstm.word_index,70)
 Y = cnblstm.build_tensor(cnblstm.trainSequences,len(cnblstm.trainSequences),cnblstm.word_index,70,True,9,True)
-
-cnblstm.X_train,cnblstm.X_test,cnblstm.Y_train,cnblstm.Y_test = train_test_split(X,Y,test_size=0.2,random_state=42)
-
+X_test = cnblstm.build_tensor(cnblstm.trainSequences,len(cnblstm.trainSequences),cnblstm.word_index,70)
+Y_test = cnblstm.build_tensor(cnblstm.testSequences,len(cnblstm.testSequences),cnblstm.word_index,70,True,9,True)
+#cnblstm.X_train,cnblstm.X_test,cnblstm.Y_train,cnblstm.Y_test = train_test_split(X,Y,test_size=0.2,random_state=42)
+cnblstm.X_train = X
+cnblstm.y_train = Y
+cnblstm.X_test = X_test
+cnblstm.y_test = Y_test
 
 cnblstm.train()
 #lstm.save_mode()
