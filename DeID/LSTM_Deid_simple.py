@@ -31,27 +31,22 @@ class CNN_BLSTM(object):
 
     def loadData(self,path):
         documents = readSurrogate(path)
-        train_docs = documents[:400]
-        test_docs = documents[400:]
+        train_docs = documents[:600]
+        test_docs = documents[600:]
         print("Tokenizing")
         self.trainSequences = tokenize_fa(train_docs)
         self.testSequences = tokenize_fa(test_docs)
         print("Tokenized")
 
     def train(self):
-        self.model.fit(self.X_train,self.Y_train,epochs=10,validation_split=0.1,batch_size=32)
+        self.model.fit(self.X_train,self.Y_train,epochs=50,validation_split=0.1,batch_size=128)
 
     def test_model(self):
         Y_pred = self.model.predict(self.X_test)
-        print(Y_pred)
+        #print(Y_pred)
         from sklearn import metrics
-        Y_testing = []
+        # Y_testing = []
         labels = [1,2,3,4,5,6,7,8,9]
-        for i in range(0,len(self.Y_test)):
-            for j in range(0,len(self.Y_test[i])):
-                for k in range(0,len(self.Y_test[i][j])):
-                    if self.Y_test[i][j][k] ==1:
-                        Y_testing.append(k)
 
         Y_pred_F = []
 
@@ -116,7 +111,7 @@ class CNN_BLSTM(object):
                                          trainable=False)
         self.model = Sequential()
         self.model.add(self.embedding_layer)
-        self.model.add(Bidirectional(LSTM(500, dropout=0.2, recurrent_dropout=0.6, return_sequences=True)))#{'sum', 'mul', 'concat', 'ave', None}
+        self.model.add(Bidirectional(LSTM(100, dropout=0.3, recurrent_dropout=0.6, return_sequences=True)))#{'sum', 'mul', 'concat', 'ave', None}
        # self.model.add(TimeDistributed(Bidirectional(LSTM(60, dropout=0.2, recurrent_dropout=0.5, return_sequences=True))))
         #self.model.add(TimeDistributed(Dense(50, activation='relu')))
         self.model.add(TimeDistributed(Dense(9, activation='softmax')))  # a dense layer as suggested by neuralNer
@@ -203,13 +198,13 @@ cnblstm.make_sequnces_labels()
 cnblstm.createModel(cnblstm.X_train)
 X = cnblstm.build_tensor(cnblstm.trainSequences,len(cnblstm.trainSequences),cnblstm.word_index,70)
 Y = cnblstm.build_tensor(cnblstm.trainSequences,len(cnblstm.trainSequences),cnblstm.word_index,70,True,9,True)
-X_test = cnblstm.build_tensor(cnblstm.trainSequences,len(cnblstm.trainSequences),cnblstm.word_index,70)
-Y_test = cnblstm.build_tensor(cnblstm.testSequences,len(cnblstm.testSequences),cnblstm.word_index,70,True,9,True)
-#cnblstm.X_train,cnblstm.X_test,cnblstm.Y_train,cnblstm.Y_test = train_test_split(X,Y,test_size=0.2,random_state=42)
-cnblstm.X_train = X
-cnblstm.Y_train = Y
-cnblstm.X_test = X_test
-cnblstm.Y_test = Y_test
+#X_test = cnblstm.build_tensor(cnblstm.trainSequences,len(cnblstm.trainSequences),cnblstm.word_index,70)
+#Y_test = cnblstm.build_tensor(cnblstm.testSequences,len(cnblstm.testSequences),cnblstm.word_index,70,True,9,True)
+cnblstm.X_train,cnblstm.X_test,cnblstm.Y_train,cnblstm.Y_test = train_test_split(X,Y,test_size=0.2,random_state=42)
+#cnblstm.X_train = X
+#cnblstm.Y_train = Y
+#cnblstm.X_test = X_test
+#cnblstm.Y_test = Y_test
 
 cnblstm.train()
 #lstm.save_mode()
