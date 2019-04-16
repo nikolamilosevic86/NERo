@@ -207,9 +207,9 @@ X_test = cnblstm.build_tensor(cnblstm.trainSequences,len(cnblstm.trainSequences)
 Y_test = cnblstm.build_tensor(cnblstm.testSequences,len(cnblstm.testSequences),cnblstm.word_index,70,True,9,True)
 #cnblstm.X_train,cnblstm.X_test,cnblstm.Y_train,cnblstm.Y_test = train_test_split(X,Y,test_size=0.2,random_state=42)
 cnblstm.X_train = X
-cnblstm.y_train = Y
+cnblstm.Y_train = Y
 cnblstm.X_test = X_test
-cnblstm.y_test = Y_test
+cnblstm.Y_test = Y_test
 
 cnblstm.train()
 #lstm.save_mode()
