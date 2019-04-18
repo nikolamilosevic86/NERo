@@ -39,7 +39,7 @@ class CNN_BLSTM(object):
         print("Tokenized")
 
     def train(self):
-        self.model.fit(self.X_train,self.Y_train,epochs=50,validation_split=0.1,batch_size=128)
+        self.model.fit(self.X_train,self.Y_train,epochs=150,validation_split=0.1,batch_size=128)
 
     def test_model(self):
         Y_pred = self.model.predict(self.X_test)
@@ -111,7 +111,7 @@ class CNN_BLSTM(object):
                                          trainable=False)
         self.model = Sequential()
         self.model.add(self.embedding_layer)
-        self.model.add(Bidirectional(LSTM(300, dropout=0.3, recurrent_dropout=0.4, return_sequences=True)))#{'sum', 'mul', 'concat', 'ave', None}
+        self.model.add(Bidirectional(LSTM(200, dropout=0.3, recurrent_dropout=0.7, return_sequences=True)))#{'sum', 'mul', 'concat', 'ave', None}
        # self.model.add(TimeDistributed(Bidirectional(LSTM(60, dropout=0.2, recurrent_dropout=0.5, return_sequences=True))))
         #self.model.add(TimeDistributed(Dense(50, activation='relu')))
         self.model.add(TimeDistributed(Dense(9, activation='softmax')))  # a dense layer as suggested by neuralNer
