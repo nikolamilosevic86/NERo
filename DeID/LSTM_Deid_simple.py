@@ -39,7 +39,7 @@ class CNN_BLSTM(object):
         print("Tokenized")
 
     def train(self):
-        self.model.fit(self.X_train,self.Y_train,epochs=150,validation_split=0.1,batch_size=128)
+        self.model.fit(self.X_train,self.Y_train,epochs=5,validation_split=0.1,batch_size=128)
 
     def test_model(self):
         Y_pred = self.model.predict(self.X_test)
