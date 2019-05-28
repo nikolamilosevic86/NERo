@@ -4,9 +4,14 @@ import tensorflow_hub as hub
 import os
 import re
 import numpy as np
+from sklearn.metrics import classification_report
+
 from bert.tokenization import FullTokenizer
 from tqdm import tqdm_notebook
 from tensorflow.keras import backend as K
+from tensorflow.python.client import device_lib
+
+print(device_lib.list_local_devices())
 
 # Initialize session
 sess = tf.Session()
@@ -267,25 +272,25 @@ def initialize_vars(sess):
     K.set_session(sess)
 
 
-model = build_model(max_seq_length)
-
-# Instantiate variables
-initialize_vars(sess)
-
-model.fit(
-    [train_input_ids, train_input_masks, train_segment_ids],
-    train_labels,
-    validation_data=([test_input_ids, test_input_masks, test_segment_ids], test_labels),
-    epochs=1,
-    batch_size=32
-)
-
-
-model.save('BertModel.h5')
-pre_save_preds = model.predict([test_input_ids[0:100],
-                                test_input_masks[0:100],
-                                test_segment_ids[0:100]]
-                              ) # predictions before we clear and reload model
+# model = build_model(max_seq_length)
+#
+# # Instantiate variables
+# initialize_vars(sess)
+#
+# model.fit(
+#     [train_input_ids, train_input_masks, train_segment_ids],
+#     train_labels,
+#     validation_data=([test_input_ids, test_input_masks, test_segment_ids], test_labels),
+#     epochs=1,
+#     batch_size=32
+# )
+#
+#
+# model.save('BertModel.h5')
+# pre_save_preds = model.predict([test_input_ids[0:100],
+#                                 test_input_masks[0:100],
+#                                 test_segment_ids[0:100]]
+#                               ) # predictions before we clear and reload model
 
 # Clear and load model
 model = None
@@ -297,4 +302,17 @@ post_save_preds = model.predict([test_input_ids[0:100],
                                 test_input_masks[0:100],
                                 test_segment_ids[0:100]]
                               ) # predictions after we clear and reload model
-print(all(pre_save_preds == post_save_preds)) # Are they the same?
+#print(all(pre_save_preds == post_save_preds)) # Are they the same?
+#print(test_labels)
+new_post_preds = []
+for pred in post_save_preds:
+    if pred >0.5:
+        new_post_preds.append(1)
+    else:
+        new_post_preds.append(0)
+labs = []
+for lab in test_labels[0:100]:
+    labs.append(lab[0])
+print(labs)
+print(new_post_preds)
+print(classification_report(new_post_preds,labs))
