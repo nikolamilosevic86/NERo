@@ -25,9 +25,9 @@ class CNN_BLSTM(object):
         self.conv_size = CONV_SIZE
         self.learning_rate = LEARNING_RATE
         self.optimizer = OPTIMIZER
-        self.MAX_SEQUENCE_LENGTH = 200
+        self.MAX_SEQUENCE_LENGTH = 180
         self.EMBEDDING_DIM = 300
-        self.MAX_NB_WORDS = 2000000
+        self.MAX_NB_WORDS = 20000
 
     def loadData(self,path):
         documents = readSurrogate(path)
@@ -39,7 +39,7 @@ class CNN_BLSTM(object):
         print("Tokenized")
 
     def train(self):
-        self.model.fit(self.X_train,self.Y_train,epochs=50,validation_split=0.1,batch_size=128)
+        self.model.fit(self.X_train,self.Y_train,epochs=5,validation_split=0.1,batch_size=128)
 
     def test_model(self):
         Y_pred = self.model.predict(self.X_test)
@@ -47,7 +47,6 @@ class CNN_BLSTM(object):
         from sklearn import metrics
         # Y_testing = []
         labels = [1,2,3,4,5,6,7,8,9]
-        labels = ["DATE", "LOCATION", "NAME", "ID", "AGE", "CONTACT", "PROFESSION", "PHI"]
 
         Y_pred_F = []
 
@@ -83,12 +82,11 @@ class CNN_BLSTM(object):
 
     def createModel(self, text):
         self.embeddings_index = {}
-        f = open(os.path.join(GLOVE_DIR, 'glove.840B.300d.txt'),encoding='utf')
+        f = open(os.path.join(GLOVE_DIR, 'glove.6B.300d.txt'))
         for line in f:
             values = line.split()
-            word = ''.join(values[:-300])
-            #word = values[0]
-            coefs = np.asarray(values[-300:], dtype='float32')
+            word = values[0]
+            coefs = np.asarray(values[1:], dtype='float32')
             self.embeddings_index[word] = coefs
         f.close()
 
@@ -113,7 +111,7 @@ class CNN_BLSTM(object):
                                          trainable=False)
         self.model = Sequential()
         self.model.add(self.embedding_layer)
-        self.model.add(Bidirectional(LSTM(100, dropout=0.3, recurrent_dropout=0.6, return_sequences=True)))#{'sum', 'mul', 'concat', 'ave', None}
+        self.model.add(Bidirectional(LSTM(200, dropout=0.3, recurrent_dropout=0.7, return_sequences=True)))#{'sum', 'mul', 'concat', 'ave', None}
        # self.model.add(TimeDistributed(Bidirectional(LSTM(60, dropout=0.2, recurrent_dropout=0.5, return_sequences=True))))
         #self.model.add(TimeDistributed(Dense(50, activation='relu')))
         self.model.add(TimeDistributed(Dense(9, activation='softmax')))  # a dense layer as suggested by neuralNer
@@ -189,9 +187,9 @@ GLOVE_DIR = "../Resources/"
 EPOCHS = 30               # paper: 80
 DROPOUT = 0.5             # paper: 0.68
 DROPOUT_RECURRENT = 0.25  # not specified in paper, 0.25 recommended
-LSTM_STATE_SIZE = 275     # paper: 275
+LSTM_STATE_SIZE = 200     # paper: 275
 CONV_SIZE = 3             # paper: 3
-LEARNING_RATE = 0.0055    # paper 0.0105
+LEARNING_RATE = 0.0105    # paper 0.0105
 OPTIMIZER = Nadam()       # paper uses SGD(lr=self.learning_rate), Nadam() recommended
 cnblstm = CNN_BLSTM(EPOCHS,DROPOUT,DROPOUT_RECURRENT,LSTM_STATE_SIZE,CONV_SIZE,LEARNING_RATE,OPTIMIZER)
 path = "../Datasets/i2b2_data/training-PHI-Gold-Set1"
