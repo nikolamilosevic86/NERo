@@ -68,7 +68,7 @@ def tokenize_fa(documents):
         file = doc["id"]
         text = text.replace("\"", "'")
         text = text.replace("`", "'")
-        text = text.replace("''", "'")
+        text = text.replace("''", "")
         tokens = custom_span_tokenize(text)
         for token in tokens:
             token_txt = text[token[0]:token[1]]
