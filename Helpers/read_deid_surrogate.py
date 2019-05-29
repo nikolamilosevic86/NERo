@@ -122,6 +122,7 @@ def custom_word_tokenize(text, language='english', preserve_line=False):
 
 def custom_span_tokenize(text, language='english', preserve_line=False):
     tokens = custom_word_tokenize(text)
+    tokens = ['"' if tok in ['``',"''"] else tok for tok in tokens]
     return align_tokens(tokens, text)
 
 #print(custom_span_tokenize("He was a 47-year-old man born on 10/12/1975. His phone number is 170-574-2276"))
