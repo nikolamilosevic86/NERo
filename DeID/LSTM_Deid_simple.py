@@ -25,9 +25,9 @@ class CNN_BLSTM(object):
         self.conv_size = CONV_SIZE
         self.learning_rate = LEARNING_RATE
         self.optimizer = OPTIMIZER
-        self.MAX_SEQUENCE_LENGTH = 2000
+        self.MAX_SEQUENCE_LENGTH = 200
         self.EMBEDDING_DIM = 300
-        self.MAX_NB_WORDS = 200000
+        self.MAX_NB_WORDS = 20000
 
     def loadData(self,path):
         documents = readSurrogate(path)
@@ -111,7 +111,7 @@ class CNN_BLSTM(object):
                                          trainable=False)
         self.model = Sequential()
         self.model.add(self.embedding_layer)
-        self.model.add(Bidirectional(LSTM(200, dropout=0.3, recurrent_dropout=0.7, return_sequences=True)))#{'sum', 'mul', 'concat', 'ave', None}
+        self.model.add(Bidirectional(LSTM(100, dropout=0.3, recurrent_dropout=0.6, return_sequences=True)))#{'sum', 'mul', 'concat', 'ave', None}
        # self.model.add(TimeDistributed(Bidirectional(LSTM(60, dropout=0.2, recurrent_dropout=0.5, return_sequences=True))))
         #self.model.add(TimeDistributed(Dense(50, activation='relu')))
         self.model.add(TimeDistributed(Dense(9, activation='softmax')))  # a dense layer as suggested by neuralNer
@@ -187,9 +187,9 @@ GLOVE_DIR = "../Resources/"
 EPOCHS = 30               # paper: 80
 DROPOUT = 0.5             # paper: 0.68
 DROPOUT_RECURRENT = 0.25  # not specified in paper, 0.25 recommended
-LSTM_STATE_SIZE = 200     # paper: 275
+LSTM_STATE_SIZE = 275     # paper: 275
 CONV_SIZE = 3             # paper: 3
-LEARNING_RATE = 0.0105    # paper 0.0105
+LEARNING_RATE = 0.0055    # paper 0.0105
 OPTIMIZER = Nadam()       # paper uses SGD(lr=self.learning_rate), Nadam() recommended
 cnblstm = CNN_BLSTM(EPOCHS,DROPOUT,DROPOUT_RECURRENT,LSTM_STATE_SIZE,CONV_SIZE,LEARNING_RATE,OPTIMIZER)
 path = "../Datasets/i2b2_data/training-PHI-Gold-Set1"
