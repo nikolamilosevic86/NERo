@@ -27,7 +27,7 @@ class CNN_BLSTM(object):
         self.optimizer = OPTIMIZER
         self.MAX_SEQUENCE_LENGTH = 200
         self.EMBEDDING_DIM = 300
-        self.MAX_NB_WORDS = 20000
+        self.MAX_NB_WORDS = 400000
 
     def loadData(self,path):
         documents = readSurrogate(path)
@@ -82,11 +82,12 @@ class CNN_BLSTM(object):
 
     def createModel(self, text):
         self.embeddings_index = {}
-        f = open(os.path.join(GLOVE_DIR, 'glove.6B.300d.txt'))
+        f = open(os.path.join(GLOVE_DIR, 'glove.840B.300d.txt'),encoding='utf')
         for line in f:
             values = line.split()
-            word = values[0]
-            coefs = np.asarray(values[1:], dtype='float32')
+            word = ''.join(values[:-300])
+            #word = values[0]
+            coefs = np.asarray(values[-300:], dtype='float32')
             self.embeddings_index[word] = coefs
         f.close()
 
