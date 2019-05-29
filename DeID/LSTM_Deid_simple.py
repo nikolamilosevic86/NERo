@@ -31,15 +31,15 @@ class CNN_BLSTM(object):
 
     def loadData(self,path):
         documents = readSurrogate(path)
-        train_docs = documents[:600]
-        test_docs = documents[600:]
+        train_docs = documents#[:600]
+        #test_docs = documents[600:]
         print("Tokenizing")
         self.trainSequences = tokenize_fa(train_docs)
-        self.testSequences = tokenize_fa(test_docs)
+        #self.testSequences = tokenize_fa(test_docs)
         print("Tokenized")
 
     def train(self):
-        self.model.fit(self.X_train,self.Y_train,epochs=50,validation_split=0.1,batch_size=128)
+        self.model.fit(self.X_train,self.Y_train,epochs=50,validation_split=0.1,batch_size=64)
 
     def test_model(self):
         Y_pred = self.model.predict(self.X_test)
@@ -47,7 +47,7 @@ class CNN_BLSTM(object):
         from sklearn import metrics
         # Y_testing = []
         labels = [1,2,3,4,5,6,7,8,9]
-        labels = ["DATE", "LOCATION", "NAME", "ID", "AGE", "CONTACT", "PROFESSION", "PHI"]
+        #labels = ["DATE", "LOCATION", "NAME", "ID", "AGE", "CONTACT", "PROFESSION", "PHI"]
 
         Y_pred_F = []
 
@@ -113,8 +113,8 @@ class CNN_BLSTM(object):
                                          trainable=False)
         self.model = Sequential()
         self.model.add(self.embedding_layer)
-        self.model.add(Bidirectional(LSTM(100, dropout=0.3, recurrent_dropout=0.6, return_sequences=True)))#{'sum', 'mul', 'concat', 'ave', None}
-       # self.model.add(TimeDistributed(Bidirectional(LSTM(60, dropout=0.2, recurrent_dropout=0.5, return_sequences=True))))
+        self.model.add(Bidirectional(LSTM(150, dropout=0.3, recurrent_dropout=0.6, return_sequences=True)))#{'sum', 'mul', 'concat', 'ave', None}
+        self.model.add(Bidirectional(LSTM(60, dropout=0.2, recurrent_dropout=0.5, return_sequences=True)))
         #self.model.add(TimeDistributed(Dense(50, activation='relu')))
         self.model.add(TimeDistributed(Dense(9, activation='softmax')))  # a dense layer as suggested by neuralNer
         #crf = CRF(17, sparse_target=True)
@@ -174,16 +174,16 @@ class CNN_BLSTM(object):
             self.X_train.append(features_seq)
             self.y_train.append(labels_seq)
         print("Training set created")
-        print("Testing set creation")
-        for seq in self.testSequences:
-            features_seq = []
-            labels_seq = []
-            for i in range(0, len(seq)):
-                features_seq.append(self.word2features(seq[i]))
-                labels_seq.append(self.word2labels(seq[i]))
-            self.X_test.append(features_seq)
-            self.y_test.append(labels_seq)
-        print("Testing set created")
+        # print("Testing set creation")
+        # for seq in self.testSequences:
+        #     features_seq = []
+        #     labels_seq = []
+        #     for i in range(0, len(seq)):
+        #         features_seq.append(self.word2features(seq[i]))
+        #         labels_seq.append(self.word2labels(seq[i]))
+        #     self.X_test.append(features_seq)
+        #     self.y_test.append(labels_seq)
+        # print("Testing set created")
 
 GLOVE_DIR = "../Resources/"
 EPOCHS = 30               # paper: 80
