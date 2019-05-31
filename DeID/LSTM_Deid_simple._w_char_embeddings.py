@@ -137,7 +137,7 @@ class CNN_BLSTM(object):
         #     len(chars), embedding_dim, input_length=maxlen)
         char_embedded = embedding_layer_char(char_input)
 
-        char_enc = TimeDistributed(LSTM(units=20, return_sequences=False,
+        char_enc = TimeDistributed(LSTM(units=50, return_sequences=False,
                                         recurrent_dropout=0.5))(char_embedded)
 
 
@@ -301,7 +301,7 @@ Y = cnblstm.build_tensor(cnblstm.trainSequences,len(cnblstm.trainSequences),cnbl
 #X_test = cnblstm.build_tensor(cnblstm.trainSequences,len(cnblstm.trainSequences),cnblstm.word_index,70)
 #Y_test = cnblstm.build_tensor(cnblstm.testSequences,len(cnblstm.testSequences),cnblstm.word_index,70,True,9,True)
 cnblstm.X_train,cnblstm.X_test,cnblstm.Y_train,cnblstm.Y_test = train_test_split(X,Y,test_size=0.2,random_state=42)
-cnblstm.X_char_train,cnblstm.X_char_test,_,_ = train_test_split(X,Y,test_size=0.2,random_state=42)
+cnblstm.X_char_train,cnblstm.X_char_test,_,_ = train_test_split(cnblstm.X_char,Y,test_size=0.2,random_state=42)
 #cnblstm.X_train = X
 #cnblstm.Y_train = Y
 #cnblstm.X_test = X_test
