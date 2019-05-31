@@ -44,10 +44,10 @@ class CNN_BLSTM(object):
         print("Tokenized")
 
     def train(self):
-        self.model.fit([self.X_train,self.X_char_train],self.Y_train,epochs=5,validation_split=0.1,batch_size=64)
+        self.model.fit([self.X_train,np.array(self.X_char_train).reshape((len(self.X_char_train), 70, 70))],self.Y_train,epochs=5,validation_split=0.1,batch_size=64)
 
     def test_model(self):
-        Y_pred = self.model.predict([self.X_test,self.X_char_test])
+        Y_pred = self.model.predict([self.X_test,np.array(self.X_char_test).reshape((len(self.X_char_test), 70, 70))])
         #print(Y_pred)
         from sklearn import metrics
         # Y_testing = []
@@ -292,7 +292,7 @@ CONV_SIZE = 3             # paper: 3
 LEARNING_RATE = 0.0055    # paper 0.0105
 OPTIMIZER = Nadam()       # paper uses SGD(lr=self.learning_rate), Nadam() recommended
 cnblstm = CNN_BLSTM(EPOCHS,DROPOUT,DROPOUT_RECURRENT,LSTM_STATE_SIZE,CONV_SIZE,LEARNING_RATE,OPTIMIZER)
-path = "../Datasets/i2b2_data/training-PHI-Gold-Set1-small"
+path = "../Datasets/i2b2_data/training-PHI-Gold-Set1"
 cnblstm.loadData(path)
 cnblstm.make_sequnces_labels()
 cnblstm.createModel(cnblstm.X_train)
