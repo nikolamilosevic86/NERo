@@ -8,12 +8,7 @@ from sklearn.preprocessing import LabelBinarizer
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 from Helpers.read_deid_surrogate import readSurrogate, tokenize_fa
-from Helpers.validation import compute_f1
-from keras.models import Model,load_model
-from keras.layers import TimeDistributed,Conv1D,Dense,Embedding,Input,Dropout,LSTM,Bidirectional,MaxPooling1D,Flatten,concatenate
-from Helpers.prepro import readfile,createBatches,createMatrices,iterate_minibatches,addCharInformation,padding
-from keras.utils import plot_model
-from keras.initializers import RandomUniform
+from keras.layers import TimeDistributed,Conv1D,Dense,Embedding,Dropout,LSTM,Bidirectional
 from keras.optimizers import SGD,Nadam
 import pickle
 
@@ -33,10 +28,8 @@ class CNN_BLSTM(object):
     def loadData(self,path):
         documents = readSurrogate(path)
         train_docs = documents#[:600]
-        #test_docs = documents[600:]
         print("Tokenizing")
         self.trainSequences = tokenize_fa(train_docs)
-        #self.testSequences = tokenize_fa(test_docs)
         print("Tokenized")
 
     def train(self):
@@ -136,11 +129,7 @@ class CNN_BLSTM(object):
         self.model.add(self.embedding_layer)
         self.model.add(Bidirectional(LSTM(150, dropout=0.3, recurrent_dropout=0.6, return_sequences=True)))#{'sum', 'mul', 'concat', 'ave', None}
         self.model.add(Bidirectional(LSTM(60, dropout=0.2, recurrent_dropout=0.5, return_sequences=True)))
-        #self.model.add(TimeDistributed(Dense(50, activation='relu')))
         self.model.add(TimeDistributed(Dense(9, activation='softmax')))  # a dense layer as suggested by neuralNer
-        #crf = CRF(17, sparse_target=True)
-        #self.model.add(crf)
-        #self.model.compile(loss=crf_loss, optimizer='adam', metrics=[crf_viterbi_accuracy])
         self.model.compile(loss="categorical_crossentropy", optimizer='rmsprop', metrics=['accuracy'])
         self.model.summary()
         pass
@@ -195,16 +184,6 @@ class CNN_BLSTM(object):
             self.X_train.append(features_seq)
             self.y_train.append(labels_seq)
         print("Training set created")
-        # print("Testing set creation")
-        # for seq in self.testSequences:
-        #     features_seq = []
-        #     labels_seq = []
-        #     for i in range(0, len(seq)):
-        #         features_seq.append(self.word2features(seq[i]))
-        #         labels_seq.append(self.word2labels(seq[i]))
-        #     self.X_test.append(features_seq)
-        #     self.y_test.append(labels_seq)
-        # print("Testing set created")
 
 GLOVE_DIR = "../Resources/"
 EPOCHS = 30               # paper: 80
@@ -222,16 +201,9 @@ cnblstm.createModel(cnblstm.X_train)
 cnblstm.word_index = pickle.load(open("../Models/DeId/word_index.pkl",'rb'))
 X = cnblstm.build_tensor(cnblstm.trainSequences,len(cnblstm.trainSequences),cnblstm.word_index,70)
 Y = cnblstm.build_tensor(cnblstm.trainSequences,len(cnblstm.trainSequences),cnblstm.word_index,70,True,9,True)
-#X_test = cnblstm.build_tensor(cnblstm.trainSequences,len(cnblstm.trainSequences),cnblstm.word_index,70)
-#Y_test = cnblstm.build_tensor(cnblstm.testSequences,len(cnblstm.testSequences),cnblstm.word_index,70,True,9,True)
 cnblstm.X_train,cnblstm.X_test,cnblstm.Y_train,cnblstm.Y_test = train_test_split(X,Y,test_size=0.2,random_state=42)
-#cnblstm.X_train = X
-#cnblstm.Y_train = Y
-#cnblstm.X_test = X_test
-#cnblstm.Y_test = Y_test
 
 cnblstm.train()
 cnblstm.save_model("../Models/DeId/BiLSTM_Glove_de_identification_model")
 cnblstm.load_model("../Models/DeId/BiLSTM_Glove_de_identification_model")
-#lstm.save_mode()
 cnblstm.test_model()
