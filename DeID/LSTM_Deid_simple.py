@@ -33,7 +33,7 @@ class CNN_BLSTM(object):
         print("Tokenized")
 
     def train(self):
-        self.model.fit(self.X_train,self.Y_train,epochs=45,validation_split=0.1,batch_size=64)
+        self.model.fit(self.X_train,self.Y_train,epochs=80,validation_split=0.1,batch_size=64)
 
     def save_model(self,model_path):
         # serialize model to JSON
