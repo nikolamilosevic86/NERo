@@ -1,7 +1,7 @@
 import numpy as np
 from keras import Sequential
 import os
-
+from keras.models import model_from_json
 from keras_preprocessing import sequence
 from keras_preprocessing.text import Tokenizer
 from sklearn.preprocessing import LabelBinarizer
@@ -15,6 +15,7 @@ from Helpers.prepro import readfile,createBatches,createMatrices,iterate_minibat
 from keras.utils import plot_model
 from keras.initializers import RandomUniform
 from keras.optimizers import SGD,Nadam
+import pickle
 
 class CNN_BLSTM(object):
     def __init__(self, EPOCHS,DROPOUT,DROPOUT_RECURRENT,LSTM_STATE_SIZE,CONV_SIZE,LEARNING_RATE,OPTIMIZER):
@@ -39,7 +40,26 @@ class CNN_BLSTM(object):
         print("Tokenized")
 
     def train(self):
-        self.model.fit(self.X_train,self.Y_train,epochs=350,validation_split=0.1,batch_size=64)
+        self.model.fit(self.X_train,self.Y_train,epochs=45,validation_split=0.1,batch_size=64)
+
+    def save_model(self,model_path):
+        # serialize model to JSON
+        model_json = self.model.to_json()
+        with open(model_path+".json", "w") as json_file:
+            json_file.write(model_json)
+        # serialize weights to HDF5
+        self.model.model.save_weights(model_path+".h5")
+        print("Saved model to disk")
+
+    def load_model(self,model_path):
+        json_file = open(model_path+".json", 'r')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        self.model = model_from_json(loaded_model_json)
+        # load weights into new model
+        self.model.load_weights(model_path+".h5")
+        self.model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+        print("Loaded model from disk")
 
     def test_model(self):
         Y_pred = self.model.predict(self.X_test)
@@ -97,6 +117,7 @@ class CNN_BLSTM(object):
         tokenizer.fit_on_texts(text)
 
         self.word_index = tokenizer.word_index
+        pickle.dump(self.word_index,open("../Models/DeId/word_index.pkl",'wb'))
 
         self.embedding_matrix = np.zeros((len(self.word_index) + 1, self.EMBEDDING_DIM))
         print(self.embedding_matrix.shape)
@@ -110,7 +131,7 @@ class CNN_BLSTM(object):
                                          self.EMBEDDING_DIM,
                                          weights=[self.embedding_matrix],
                                          input_length=70,
-                                         trainable=False)
+                                         trainable=True)
         self.model = Sequential()
         self.model.add(self.embedding_layer)
         self.model.add(Bidirectional(LSTM(150, dropout=0.3, recurrent_dropout=0.6, return_sequences=True)))#{'sum', 'mul', 'concat', 'ave', None}
@@ -198,6 +219,7 @@ path = "../Datasets/i2b2_data/training-PHI-Gold-Set1"
 cnblstm.loadData(path)
 cnblstm.make_sequnces_labels()
 cnblstm.createModel(cnblstm.X_train)
+cnblstm.word_index = pickle.load(open("../Models/DeId/word_index.pkl",'rb'))
 X = cnblstm.build_tensor(cnblstm.trainSequences,len(cnblstm.trainSequences),cnblstm.word_index,70)
 Y = cnblstm.build_tensor(cnblstm.trainSequences,len(cnblstm.trainSequences),cnblstm.word_index,70,True,9,True)
 #X_test = cnblstm.build_tensor(cnblstm.trainSequences,len(cnblstm.trainSequences),cnblstm.word_index,70)
@@ -209,5 +231,7 @@ cnblstm.X_train,cnblstm.X_test,cnblstm.Y_train,cnblstm.Y_test = train_test_split
 #cnblstm.Y_test = Y_test
 
 cnblstm.train()
+cnblstm.save_model("../Models/DeId/BiLSTM_Glove_de_identification_model")
+cnblstm.load_model("../Models/DeId/BiLSTM_Glove_de_identification_model")
 #lstm.save_mode()
 cnblstm.test_model()

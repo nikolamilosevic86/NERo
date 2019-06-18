@@ -185,7 +185,7 @@ class CRF_DeId_NER():
         )
         self.crf_model.fit(self.X_train, self.y_train)
     def save_model(self,path):
-        pass
+        pickle.dump(crf.crf_model, open(path, 'wb'))
     def predict(self,text):
         pass
 print("Dataset reading")
